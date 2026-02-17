@@ -1,0 +1,59 @@
+! configuracion de switch de acceso ECP4_01_A
+enable 
+configure terminal 
+
+! Parametros basicos 
+hostname ECP4_01_A
+ip domain-name eq2.com.mx
+banner mod #Acceso restringido a personal autorizado#
+enable secret class
+service password-encryption
+username admin secret cisco
+line console 0
+password cisco
+login
+line vty 0 4
+transport input ssh
+login local
+
+! Configuracion de ssh
+cryto key generate rsa
+1024
+ip ssh version 2
+
+! Configuracion de vlans
+vlan 4
+name Directivos
+vlan 5
+name Soporte_TI
+vlan 7
+name Servidores
+vlan 99
+name Admin_Infra_TI
+
+! Asignacion de puertos vlans
+interface range fa0/1 - 4
+switchport mode access
+switchport access vlan 4
+interface range fa0/5 - 8
+switchport mode access
+switchport access vlan 5
+interface range fa0/9 - 12
+switchport mode access
+switchport access vlan 7
+interface range fa0/23 -24
+switchport mode access
+switchport access vlan 99
+
+! Configuracion de puerto troncal
+interface gi0/1
+switchport mode trunk
+switchport trunk allowed vlan 4,5,7,99
+
+! Configuracion de interface de administracion
+interface vlan 99
+ip address 172.16.36.129 255.255.255.128
+no shutdown
+
+! Configuracion de gateway predeterminada
+ip default-gateway 172.16.36.254
